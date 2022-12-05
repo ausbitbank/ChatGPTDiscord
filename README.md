@@ -4,6 +4,7 @@ Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc. Forked from h
 # Setup
 ## Install
 `pip3 install revChatGPT --upgrade`
+`pip3 install discord json`
 ## Get your session token
 Go to https://chat.openai.com/chat and log in or sign up
 1. Open console with `F12`
