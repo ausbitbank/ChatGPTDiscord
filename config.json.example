@@ -3,4 +3,5 @@
     "session_token": "<SESSION_TOKEN>",
     "discord_bot_token": "<DISCORD_API_KEY>",
     "discord_channel": 123456789,
+    "discord_admin_id": 123456789
 }
