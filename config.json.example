@@ -1,4 +1,6 @@
 {
     "Authorization": "<API_KEY>",
-    "session_token": "<SESSION_TOKEN>"
+    "session_token": "<SESSION_TOKEN>",
+    "discord_api_key": "<DISCORD_API_KEY>",
+    "discord_channel": 123456789,
 }
