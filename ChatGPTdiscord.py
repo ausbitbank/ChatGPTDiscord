@@ -31,7 +31,7 @@ if __name__ == "__main__":
             return
         if message.channel.id != config["discord_channel"]:
             return
-        if message.content == 'refresh'
+        if message.content == 'refresh':
             chatbot.refresh_session()
         print(message.content)
         try:
