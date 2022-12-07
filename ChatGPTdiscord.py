@@ -1,9 +1,9 @@
-import requests, json, discord, logging, sys, signal
+import requests, json, discord, logging, sys, signal, asyncio, functools, typing
 from revChatGPT.revChatGPT import Chatbot
+
 '''
 # API access on 127.0.0.1:9879/chatgpt?prompt=PROMPT
 from flask import Flask, request
-from threading import Thread
 api = Flask(__name__)
 @api.route('/chatgpt')
 def promptapi():
@@ -46,6 +46,10 @@ def split_string_into_chunks(string, chunk_size):
     chunks.append(chunk)# Add the chunk to the list of chunks
     string = string[chunk_size:]# Remove the chunk from the original string
   return chunks# Return the list of chunks
+
+async def download_text(url):
+    response = await requests.get(url)
+    return response.text
 '''
 from bs4 import BeautifulSoup
 def get_google_response(query):
@@ -63,6 +67,20 @@ def get_google_response(query):
     print(result_str)
     return result_str
 '''
+
+def to_thread(func: typing.Callable) -> typing.Coroutine:
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        loop = asyncio.get_event_loop()
+        wrapped = functools.partial(func, *args, **kwargs)
+        return await loop.run_in_executor(None, wrapped)
+    return wrapper
+
+@to_thread
+def get_answer(chatbot,query):
+    response = chatbot.get_chat_response(query)
+    return response
+
 if __name__ == "__main__":
 #    thread = Thread(target=run_api);thread.start()
     with open("config.json", "r") as f: config = json.load(f)
@@ -80,26 +98,38 @@ if __name__ == "__main__":
         if message.author.bot: return
         if message.content == 'refresh' and message.author.id == config['discord_admin_id']: chatbot.refresh_session();return
         if message.content == 'restart' and message.author.id == config['discord_admin_id']: exec(open(sys.argv[0]).read());return
+        if message.content.startswith('!dream'):return
+        '''
         if message.content.startswith('google'):
             chunks=split_string_into_chunks(get_google_response(message.content[7:]),1950)
             for chunk in chunks: await message.reply(chunk)
             return
-        '''
         if message.attachments and message.attachments[0].width and message.attachments[0].height:
             image_url = message.attachments[0].proxy_url
             image_desc = image_url_to_description(image_url)
             await message.reply(image_desc)
             return
         '''
+        longquery=''
+        if message.attachments and message.attachments[0].content_type.startswith('text'):
+            print(message.attachments[0].content_type)
+            longquery=download_text(message.attachments[0].proxy_url)
+
         if message.mentions:
             for user in message.mentions:
                 if user != client.user: return
         print(message.content)
         try:
-            response=chatbot.get_chat_response(message.content)
+            query=message.content
+            if longquery and longquery != '':
+                query+='\n```'+longquery+'\n```'
+                print(query)
+            response=await get_answer(chatbot,query)
             print(response['message'])
             chunks=split_string_into_chunks(response['message'],1950)
             for chunk in chunks:
+                chunk=chunk.replace("As a large language model trained by OpenAI,", "")
+                chunk=chunk.replace("As a language model trained by OpenAI, ", "")
                 chunk=chunk.replace("OpenAI", "EvilCorp")
                 chunk=chunk.replace("!Dream:", "!dream ")
                 await message.reply(chunk)
