@@ -121,6 +121,7 @@ if __name__ == "__main__":
         print(message.content)
         try:
             query=message.content
+            await message.add_reaction("👀")
             if longquery and longquery != '':
                 query+='\n```'+longquery+'\n```'
                 print(query)
@@ -133,7 +134,10 @@ if __name__ == "__main__":
                 chunk=chunk.replace("OpenAI", "EvilCorp")
                 chunk=chunk.replace("!Dream:", "!dream ")
                 await message.reply(chunk)
+                await message.add_reaction("☑️")
+
         except Exception as e:
             print("Something went wrong!")
             print(e)
+            await message.add_reaction("💩")
     client.run(config["discord_bot_token"])
