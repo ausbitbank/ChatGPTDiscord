@@ -47,9 +47,6 @@ def split_string_into_chunks(string, chunk_size):
     string = string[chunk_size:]# Remove the chunk from the original string
   return chunks# Return the list of chunks
 
-async def download_text(url):
-    response = await requests.get(url)
-    return response.text
 '''
 from bs4 import BeautifulSoup
 def get_google_response(query):
@@ -112,8 +109,10 @@ if __name__ == "__main__":
         '''
         longquery=''
         if message.attachments and message.attachments[0].content_type.startswith('text'):
-            print(message.attachments[0].content_type)
-            longquery=download_text(message.attachments[0].proxy_url)
+            print('text attachment found, adding to prompt')
+            attachment=message.attachments[0]
+            data=await attachment.read()
+            longquery=data.decode()
 
         if message.mentions:
             for user in message.mentions:
@@ -123,10 +122,9 @@ if __name__ == "__main__":
             query=message.content
             await message.add_reaction("👀")
             if longquery and longquery != '':
-                query+='\n```'+longquery+'\n```'
-                print(query)
+                query=message.content+'\n```'+longquery+'\n```'
             response=await get_answer(chatbot,query)
-            print(response['message'])
+            print(response)
             chunks=split_string_into_chunks(response['message'],1950)
             for chunk in chunks:
                 chunk=chunk.replace("As a large language model trained by OpenAI,", "")
