@@ -1,5 +1,6 @@
 # ChatGPT
 Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc. Forked from https://github.com/acheong08/ChatGPT
+Use a version of it live at https://discord.gg/WBKG7VS8Cx
 
 # Setup
 ## Install
