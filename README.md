@@ -1,10 +1,18 @@
 # ChatGPT
-Reverse Engineered ChatGPT by OpenAI. Extensible for chatbots etc. Forked from https://github.com/acheong08/ChatGPT
+A discord bot using openAI's revChatGPT api to act as a smart chat assistant.
+
+Currently setup for a single channel, and a single conversational thread.
+
+Accepts discord file upload of text based files.
+
+Originally forked from https://github.com/acheong08/ChatGPT
+
 Use a version of it live at https://discord.gg/WBKG7VS8Cx
 
 # Setup
 ## Install
 `pip3 install revChatGPT --upgrade`
+
 `pip3 install discord json`
 
 ## Get your session token
