@@ -48,3 +48,8 @@ Go to https://chat.openai.com/chat and log in or sign up
 # Running
 ```
  $ python3 ChatGPTDiscord.py            
+```
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ausbitbank/stable-diffusion-discord-bot&type=Date)](https://star-history.com/#ausbitbank/stable-diffusion-discord-bot&Date)
