@@ -11,6 +11,7 @@ Use a version of it live at https://discord.gg/WBKG7VS8Cx
 
 # Setup
 ## Install
+`pip3 install requests discord asyncio typing`
 `pip3 install revChatGPT --upgrade`
 
 `pip3 install discord json`
