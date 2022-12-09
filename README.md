@@ -14,8 +14,6 @@ Use a version of it live at https://discord.gg/WBKG7VS8Cx
 `pip3 install requests discord asyncio typing`
 `pip3 install revChatGPT --upgrade`
 
-`pip3 install discord json`
-
 ## Get your session token
 Go to https://chat.openai.com/chat and log in or sign up
 1. Open console with `F12`
