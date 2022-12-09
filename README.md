@@ -11,8 +11,18 @@ Use a version of it live at https://discord.gg/WBKG7VS8Cx
 
 # Setup
 ## Install
+`git clone https://github.com/ausbitbank/ChatGPTDiscord`
+
+`cd ChatGPTDiscord`
+
 `pip3 install requests discord asyncio typing`
+
 `pip3 install revChatGPT --upgrade`
+
+(Setup config file with steps below)
+
+`python3 ./ChatGPTdiscord.py`
+
 
 ## Get your session token
 Go to https://chat.openai.com/chat and log in or sign up
