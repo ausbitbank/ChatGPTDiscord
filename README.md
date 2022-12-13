@@ -19,7 +19,8 @@ Use a version of it live at https://discord.gg/WBKG7VS8Cx
 
 `pip3 install revChatGPT --upgrade`
 
-(Setup config file with steps below)
+(Setup config file with steps below, see also https://github.com/acheong08/ChatGPT/wiki/Setup)
+
 
 `python3 ./ChatGPTdiscord.py`
 
