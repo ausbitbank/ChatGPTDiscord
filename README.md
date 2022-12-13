@@ -1,13 +1,17 @@
-# ChatGPT
-A discord bot using openAI's revChatGPT api to act as a smart chat assistant.
+# ChatGPTDiscord
+A discord bot using openAI's revChatGPT api to act as a smart chat assistant allowing for natural, conversational interactions between users and the language model. This can be a great way to generate creative ideas, have engaging discussions, or even just pass the time with some entertaining banter.
 
 Currently setup for a single channel, and a single conversational thread. Will allow user to DM as well, but conversational context is shared with the public channel.
 
 Accepts discord file upload of text based files (analyse code or essays!)
 
+Splits output from chatgpt into multiple messages to get around discord message size limits.
+
+Removes common limitation phrases from output, and rebrands OpenAI to EvilCorp.
+
 Originally forked from https://github.com/acheong08/ChatGPT
 
-Use a version of it live at https://discord.gg/WBKG7VS8Cx
+Use a version of it (named "wiseguy") live in this discord https://discord.gg/WBKG7VS8Cx in the #chatgpt channel
 
 # Setup
 ## Install
