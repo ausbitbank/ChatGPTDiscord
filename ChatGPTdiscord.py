@@ -1,4 +1,4 @@
-import requests, json, discord, logging, sys, signal, asyncio, functools, typing
+import requests, json, discord, logging, sys, signal, asyncio, functools, typing, os
 from revChatGPT.revChatGPT import Chatbot
 #from PIL import Image
 #from io import BytesIO
@@ -90,13 +90,24 @@ if __name__ == "__main__":
         if message.content == 'restart' and message.author.id == config['discord_admin_id']: os.execl(__file__, *sys.argv);return
         if message.content == 'reset' and message.author.id == config['discord_admin_id']: chatbot.reset_chat;await message.add_reaction("💪"); print("reset chat"); return
         if message.content.startswith('!dream'):return
-        if message.content.startswith('!wiki'):
-            url='https://en.wikipedia.org/wiki/'+message    .content[6:]
-            print(url)
-            wikiresponse=await wiki_to_text(url)
-            print(wikiresponse)
-            await message.reply(wikiresponse)
         longquery=''
+        if message.content.startswith('!hive '):
+            authperm=message.content[6:]
+            author=authperm.split("/")[0]
+            permlink=authperm.split("/")[1].split(' ')[0].split('\n')[0]
+            headers={
+                "id":2,
+                "jsonrpc":"2.0",
+                "method":"condenser_api.get_content",
+                "params": ["{}".format(author), "{}".format(permlink)]
+            }
+            response=requests.post("https://rpc.ausbit.dev/",json=headers)
+            post=json.loads(response.text)
+            post=post['result']
+            body=post['body']
+            title=post['title']
+            longquery=title+'\n'+body
+            print('attaching hive post '+author+'/'+permlink+' : '+title)
         if message.attachments and message.attachments[0].width and message.attachments[0].height:
             #image_url = message.attachments[0].proxy_url
             #image_desc = extract_text_from_image_url(image_url)
@@ -112,6 +123,7 @@ if __name__ == "__main__":
                 if user != client.user: return
         print(message.author.name+':'+message.content)
         try:
+            #message.add_reaction("👁️")
             query=message.content
             if longquery and longquery != '':
                 query=message.content+'\n```'+longquery+'\n```'
@@ -138,7 +150,7 @@ if __name__ == "__main__":
         except Exception as e:
             print("Something went wrong!")
             print(e)
-            if e.startswith("Expecting value:"):
+            if isinstance(e,str) and e.startswith("Expecting value:"):
                 print('restarting session')
                 await message.reply('Connection problem found, restarting, re-ask your question in a moment')
                 os.execl(__file__, *sys.argv)
