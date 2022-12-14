@@ -1,5 +1,5 @@
 # ChatGPTDiscord
-A discord bot using openAI's revChatGPT api to act as a smart chat assistant allowing for natural, conversational interactions between users and the language model. This can be a great way to generate creative ideas, have engaging discussions, or even just pass the time with some entertaining banter.
+A discord bot using openAI's ChatGPT api to act as a smart chat assistant allowing for natural, conversational interactions between users and the language model. This can be a great way to generate creative ideas, have engaging discussions, or even just pass the time with some entertaining banter.
 
 Currently setup for a single channel, and a single conversational thread. Will allow user to DM as well, but conversational context is shared with the public channel.
 
