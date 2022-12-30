@@ -137,7 +137,9 @@ if __name__ == "__main__":
             #cb.conversation_id=cid
             #if type(message.channel)==discord.DMChannel:#DM
             #else:#In channel
-            response=await get_answer(cb,query)
+            #start typing
+            async with message.channel.typing():
+                response=await get_answer(cb,query)
             userdb[did]={'cid':response['conversation_id']}
             print(userdb)
             print(response)
