@@ -82,6 +82,11 @@ if __name__ == "__main__":
         print(f'We have logged in as {client.user}')
 
     @client.event
+    async def on_reaction_add(reaction, user):
+        print(reaction)
+        print(user)
+
+    @client.event
     async def on_message(message):
         if message.author == client.user: return
         if message.channel.id != config["discord_channel"] and type(message.channel)!=discord.DMChannel: return
@@ -101,7 +106,7 @@ if __name__ == "__main__":
                 "method":"condenser_api.get_content",
                 "params": ["{}".format(author), "{}".format(permlink)]
             }
-            response=requests.post("https://rpc.ausbit.dev/",json=headers)
+            response=requests.post("https://api.hive.blog/",json=headers)
             post=json.loads(response.text)
             post=post['result']
             body=post['body']
@@ -123,7 +128,6 @@ if __name__ == "__main__":
                 if user != client.user: return
         print(message.author.name+':'+message.content)
         try:
-            #message.add_reaction("👁️")
             query=message.content
             if longquery and longquery != '':
                 query=message.content+'\n```'+longquery+'\n```'
@@ -134,14 +138,14 @@ if __name__ == "__main__":
                 cid=userdb[message.channel.id]
             else:
                 cid=None
-            #cb.conversation_id=cid
-            #if type(message.channel)==discord.DMChannel:#DM
-            #else:#In channel
-            #start typing
-            async with message.channel.typing():
-                response=await get_answer(cb,query)
+            if isinstance(message.channel,discord.channel.DMChannel) and config["dm"]!=False:#DM, and DM's not disabled in config
+                await message.reply("Direct messages have been disabled")
+                return
+            else:#In channel
+                async with message.channel.typing():
+                    response=await get_answer(cb,query)
             userdb[did]={'cid':response['conversation_id']}
-            print(userdb)
+            #print(userdb)
             print(response)
             print('ai:'+response['message'])
             r=tidy_response(response['message'])
@@ -151,10 +155,7 @@ if __name__ == "__main__":
 
         except Exception as e:
             print("Something went wrong!")
-            print(e)
-            if isinstance(e,str) and e.startswith("Expecting value:"):
-                print('restarting session')
-                await message.reply('Connection problem found, restarting, re-ask your question in a moment')
-                os.execl(__file__, *sys.argv)
+            error=(str(e))
+            await message.reply(":warning: **Error:** "+error)
             await message.add_reaction("💩")
     client.run(config["discord_bot_token"])
