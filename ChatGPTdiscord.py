@@ -1,10 +1,14 @@
 import requests, json, discord, logging, sys, signal, asyncio, functools, typing, os
-from revChatGPT.ChatGPT import Chatbot
-#from PIL import Image
-#from io import BytesIO
-#from pytesseract import image_to_string
+#from revChatGPT.ChatGPT import Chatbot
+from revChatGPT.Official import Chatbot
 
 '''
+Disabled functions that I played with in early functions, leaving in case others find them useful
+
+from PIL import Image
+from io import BytesIO
+from pytesseract import image_to_string
+
 # API access on 127.0.0.1:9879/chatgpt?prompt=PROMPT
 from flask import Flask, request
 api = Flask(__name__)
@@ -24,12 +28,12 @@ def promptapi():
 def run_api():
     api.run(host='localhost', port=9879)
 
-'''
-#def extract_text_from_image_url(image_url):
-#    response = requests.get(image_url)
-#    image = Image.open(BytesIO(response.content))
-#    return image_to_string(image)
 
+def extract_text_from_image_url(image_url):
+    response = requests.get(image_url)
+    image = Image.open(BytesIO(response.content))
+    return image_to_string(image)
+'''
 def split_string_into_chunks(string, chunk_size):
   chunks = []# Create an empty list to store the chunks
   while len(string) > 0:# Use a while loop to iterate over the string
@@ -70,11 +74,10 @@ def get_answer(chatbot,query):
     return response
 
 if __name__ == "__main__":
-#    thread = Thread(target=run_api);thread.start()
     with open("config.json", "r") as f: config = json.load(f)
     intents = discord.Intents.default();intents.message_content = True
     client = discord.Client(intents=intents)
-    chatbot = Chatbot(config, conversation_id=None)
+    chatbot = Chatbot(api_key=config['api_key'])
     userdb={}
 
     @client.event
@@ -91,9 +94,9 @@ if __name__ == "__main__":
         if message.author == client.user: return
         if message.channel.id != config["discord_channel"] and type(message.channel)!=discord.DMChannel: return
         if message.author.bot: return
-        if message.content == 'refresh' and message.author.id == config['discord_admin_id']: chatbot.refresh_session(); await message.add_reaction("🔄"); print("refresh session"); return
-        if message.content == 'restart' and message.author.id == config['discord_admin_id']: os.execl(__file__, *sys.argv);return
-        if message.content == 'reset' and message.author.id == config['discord_admin_id']: chatbot.reset_chat;await message.add_reaction("💪"); print("reset chat"); return
+        #if message.content == '!refresh' and message.author.id == config['discord_admin_id']: chatbot.refresh_session(); await message.add_reaction("🔄"); print("refresh session"); return
+        #if message.content == '!restart' and message.author.id == config['discord_admin_id']: os.execl(__file__, *sys.argv);return
+        if message.content == '!reset' and message.author.id == config['discord_admin_id']: chatbot.reset();await message.add_reaction("💪"); print("reset chat"); return
         if message.content.startswith('!dream'):return
         longquery=''
         if message.content.startswith('!hive '):
@@ -127,28 +130,29 @@ if __name__ == "__main__":
             for user in message.mentions:
                 if user != client.user: return
         print(message.author.name+':'+message.content)
+        cid=None
+        did=str(message.channel.id)
+        print(did)
+        cb=chatbot
+        if did in userdb:
+            cid=userdb[message.channel.id]
+        else:
+            cid=None
         try:
             query=message.content
             if longquery and longquery != '':
                 query=message.content+'\n```'+longquery+'\n```'
-            cid=None
-            did=message.channel.id
-            cb=chatbot
-            if did in userdb:
-                cid=userdb[message.channel.id]
-            else:
-                cid=None
             if isinstance(message.channel,discord.channel.DMChannel) and config["dm"]!=False:#DM, and DM's not disabled in config
                 await message.reply("Direct messages have been disabled")
                 return
             else:#In channel
                 async with message.channel.typing():
                     response=await get_answer(cb,query)
-            userdb[did]={'cid':response['conversation_id']}
+            #userdb[did]={'cid':response['conversation_id']}
             #print(userdb)
             print(response)
-            print('ai:'+response['message'])
-            r=tidy_response(response['message'])
+            #print('ai:'+response["choices"][0]["text"])
+            r=tidy_response(response["choices"][0]["text"])
             chunks=split_string_into_chunks(r,1975) # Make sure response chunks fit inside a discord message (max 2k characters)
             for chunk in chunks:
                 await message.reply(chunk)
@@ -156,6 +160,16 @@ if __name__ == "__main__":
         except Exception as e:
             print("Something went wrong!")
             error=(str(e))
-            await message.reply(":warning: **Error:** "+error)
+            #if error == "'NoneType' object is not subscriptable":
+            #if error == "('Response code error: ', 429)":
+            #    error+='\nPlease wait for your previous response to be answered before asking another'
+            if error == "('Response code error: ', 403)":
+                error+='\n403 forbidden response from api server'
+            if error == "('Response code error: ', 524)":
+                error+='\nHTTP response status code 524 A timeout occurred is an unofficial server error that is specific to Cloudflare. This HTTP status code occurs when a successful HTTP connection was made to the origin server but the HTTP Connection timed out before the HTTP request was complete'
+            if error == "('Response code error: ', 502)":
+                error+='\nHTTP response status code 502 Bad Gateway server error response code indicates that the server, while acting as a gateway or proxy, received an invalid response from the upstream server.'
+            errorembed=discord.Embed(description=':warning: '+error, color=0xFF5733)
+            await message.reply(embed=errorembed)
             await message.add_reaction("💩")
     client.run(config["discord_bot_token"])
