@@ -23,7 +23,7 @@ Use a version of it (named "wiseguy") live in this discord https://discord.gg/WB
 
 `pip3 install revChatGPT --upgrade`
 
-Setup config file with the steps in https://github.com/acheong08/ChatGPT/wiki/Setup
+Setup config file with the steps in https://github.com/acheong08/ChatGPT
 Be sure to add in your "discord_bot_token" (api key), "discord_channel" (channel id for where you want it to response) and "discord_admin_id": (numeric admin account id)
 
 # Running
