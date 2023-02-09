@@ -1,6 +1,7 @@
 import requests, json, discord, logging, sys, signal, asyncio, functools, typing, os
 #from revChatGPT.ChatGPT import Chatbot
-from revChatGPT.Official import Chatbot
+#from revChatGPT.Official import Chatbot
+from revChatGPT.Unofficial import Chatbot
 
 '''
 Disabled functions that I played with in early functions, leaving in case others find them useful
@@ -69,15 +70,17 @@ def to_thread(func: typing.Callable) -> typing.Coroutine:
     return wrapper
 
 @to_thread
-def get_answer(chatbot,query):
-    response = chatbot.ask(query)
-    return response
+def get_answer(chatbot,query,id):
+    #response = chatbot.ask(query,user=id) official
+    response = chatbot.ask(query) #unofficial
+    return response['message']
 
 if __name__ == "__main__":
     with open("config.json", "r") as f: config = json.load(f)
     intents = discord.Intents.default();intents.message_content = True
     client = discord.Client(intents=intents)
-    chatbot = Chatbot(api_key=config['api_key'])
+    #chatbot = Chatbot(api_key=config['api_key']) #official
+    chatbot = Chatbot(config) #unofficial
     userdb={}
 
     @client.event
@@ -96,7 +99,7 @@ if __name__ == "__main__":
         if message.author.bot: return
         #if message.content == '!refresh' and message.author.id == config['discord_admin_id']: chatbot.refresh_session(); await message.add_reaction("🔄"); print("refresh session"); return
         #if message.content == '!restart' and message.author.id == config['discord_admin_id']: os.execl(__file__, *sys.argv);return
-        if message.content == '!reset' and message.author.id == config['discord_admin_id']: chatbot.reset();await message.add_reaction("💪"); print("reset chat"); return
+        if message.content == '!reset': chatbot.reset();await message.add_reaction("💪"); print("reset chat"); return
         if message.content.startswith('!dream'):return
         longquery=''
         if message.content.startswith('!hive '):
@@ -142,17 +145,18 @@ if __name__ == "__main__":
             query=message.content
             if longquery and longquery != '':
                 query=message.content+'\n```'+longquery+'\n```'
-            if isinstance(message.channel,discord.channel.DMChannel) and config["dm"]!=False:#DM, and DM's not disabled in config
+            if isinstance(message.channel,discord.channel.DMChannel) and config["dm"]=="False":#DM, and DM's not disabled in config
                 await message.reply("Direct messages have been disabled")
                 return
             else:#In channel
                 async with message.channel.typing():
-                    response=await get_answer(cb,query)
+                    response=await get_answer(cb,query,did)
             #userdb[did]={'cid':response['conversation_id']}
             #print(userdb)
             print(response)
-            #print('ai:'+response["choices"][0]["text"])
-            r=tidy_response(response["choices"][0]["text"])
+            #print('ai:'+response["choices"][0]["text"]) #official
+            #r=tidy_response(response["choices"][0]["text"]) #unofficial
+            r=tidy_response(response)
             chunks=split_string_into_chunks(r,1975) # Make sure response chunks fit inside a discord message (max 2k characters)
             for chunk in chunks:
                 await message.reply(chunk)
