@@ -1,7 +1,7 @@
 import requests, json, discord, logging, sys, signal, asyncio, functools, typing, os
 #from revChatGPT.ChatGPT import Chatbot
 #from revChatGPT.Official import Chatbot
-from revChatGPT.Unofficial import Chatbot
+from revChatGPT.V1 import Chatbot
 
 '''
 Disabled functions that I played with in early functions, leaving in case others find them useful
@@ -72,15 +72,21 @@ def to_thread(func: typing.Callable) -> typing.Coroutine:
 @to_thread
 def get_answer(chatbot,query,id):
     #response = chatbot.ask(query,user=id) official
-    response = chatbot.ask(query) #unofficial
-    return response['message']
+    prev_text = ""
+    for data in chatbot.ask(query):
+        message = data["message"][len(prev_text) :]
+        print(message, end="", flush=True)
+        prev_text = data["message"]
+    return prev_text
 
 if __name__ == "__main__":
     with open("config.json", "r") as f: config = json.load(f)
     intents = discord.Intents.default();intents.message_content = True
     client = discord.Client(intents=intents)
     #chatbot = Chatbot(api_key=config['api_key']) #official
-    chatbot = Chatbot(config) #unofficial
+    #print(config)
+    #print(config['session_token'])
+    chatbot = Chatbot({"access_token":config["access_token"]}) #unofficial
     userdb={}
 
     @client.event
